@@ -879,9 +879,9 @@ def generate_treesim(design, row_thresholds, col_thresholds, true_first_split = 
     else:
         true_first_split = [[0,1], list(range(2, 8))]
     
-    print datetime.now(), "Constructing matrix"
+    print(datetime.now(), "Constructing matrix")
     M0, true_csets, true_ssets = generate_toy_design(design, row_thresholds, col_thresholds, coverage = cov, seed = seed)
-    print datetime.now(), "Merging cells within clones"
+    print(datetime.now(), "Merging cells within clones")
 
     if version == 'supernodes':
         M1, my_row_thresholds = merge_perfect(M0, true_csets, max_cluster_size = max_cluster_size, seed = seed, version = version)
@@ -929,7 +929,7 @@ def declonal_cluster(M, true_part, true_clonal = False, cluster_spectral = False
             elif label == 2:
                 idx2.append(idx)
             else:
-                print "uhoh"
+                print("uhoh")
 
         colsums = colsums.reshape(-1, 1)
         mean0 = np.mean(colsums[idx0])
@@ -997,6 +997,9 @@ def construct_graph_graphtool(M):
     """
     M = M.tocoo()
     G = graph_tool.Graph(directed = False)
+    
+    vtype = G.new_vertex_property("short")
+
     label2id = {}
     for i,j,value in zip(M.row, M.col, M.data):
         assert value == 1
@@ -1007,16 +1010,19 @@ def construct_graph_graphtool(M):
         else:
             v = G.add_vertex()
             label2id[cell_key] = int(v)
+            vtype[v] = 1
             
         if snv_key in label2id:
             w = label2id[snv_key]
         else:
             w = G.add_vertex()
             label2id[snv_key] = int(w)
-        G.add_edge(v, w)  
-    return G, label2id
+            vtype[w] = 2
 
-def test_graphtool(M, true_labels, min_blocks = 5, max_blocks = None, nested = False):
+        G.add_edge(v, w)  
+    return G, label2id, vtype
+
+def test_graphtool(M, true_labels, min_blocks = 4, max_blocks = None, nested = True):
     """
     Apply the SBM inference functions from graph_tool to the given biadjacency matrix M.
     Returns the ARI between the inferred partition and the partition [true_part[0], true_part[1:]]
@@ -1024,31 +1030,48 @@ def test_graphtool(M, true_labels, min_blocks = 5, max_blocks = None, nested = F
     assert min_blocks is None or isinstance(min_blocks, int)
     assert max_blocks is None or isinstance(max_blocks, int)
     m, n = M.shape
-    G, label2id = construct_graph_graphtool(M)
+    G, label2id, vtype = construct_graph_graphtool(M)
     if nested:
-        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks)
+        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
         b = r.get_bs()[0]
     else:
-        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks)
+        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
         b = r.get_blocks()
     
     id2label = reverse_dict(label2id)
     inf_labels = [b[label2id['cell{}'.format(i)]] if 'cell{}'.format(i) in label2id else 100 for i in range(m)]
     return adjusted_rand_score(inf_labels, true_labels)
 
-def test_graphtool_oneshot(M, true_labels = None, min_blocks = 4, max_blocks = None, nested = False):
+
+def SBMClone(M, min_blocks = 2, max_blocks = None, nested = True):
+    """
+    Apply the SBMClone to the given biadjacency matrix M.
+    Returns the result object from the graph-tool inference framework.
+    """
+    assert min_blocks is None or isinstance(min_blocks, int)
+    assert max_blocks is None or isinstance(max_blocks, int)
+    m, n = M.shape
+    G, label2id, vtype = construct_graph_graphtool(M)
+    if nested:
+        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
+    else:
+        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
+    
+    return r
+
+def test_graphtool_oneshot(M, true_labels = None, min_blocks = 4, max_blocks = None, nested = True):
     """
     Apply the SBM inference functions from graph_tool to the given biadjacency matrix M.
     If true_labels is not given, assumes M is the empirical tree structure and uses the ground truth labeling of the 4085 cells.
     Returns the ARI between the inferred partition and the partition given by true_lables, as well as the inferred partition.
     """
     m, n = M.shape
-    G, label2id = construct_graph_graphtool(M)
+    G, label2id, vtype = construct_graph_graphtool(M)
     if nested:
-        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks)
+        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
         b = r.get_bs()[0]
     else:
-        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks)
+        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
         b = r.get_blocks()
 
     if true_labels is None:
@@ -1076,7 +1099,7 @@ def blockmodel_to_sets(b, label2id, n_cells = None, n_snvs = None):
     snv_array = [(b[label2id['snv{}'.format(i)]] if 'snv{}'.format(i) in label2id else 100) for i in range(n_snvs)]
     return cell_array, snv_array
 
-def test_graphtool_recursive(M, min_blocks = 4, max_blocks = 5, nested = False):
+def test_graphtool_recursive(M, min_blocks = 4, max_blocks = 5, nested = True):
     """
     Given biadjacency matrix M, infers a stochastic block model fitting M with at most 5 blocks (first split),
     then divides the cells into sets accordingly and infers an SBM with at most 5 blocks from each induced submatrix.
@@ -1091,12 +1114,12 @@ def test_graphtool_recursive(M, min_blocks = 4, max_blocks = 5, nested = False):
     first_labels = [0] * 1952 + [1] * 2133
     first_ari, (cellpart, snvpart) = test_graphtool(M, first_labels, min_blocks, max_blocks, nested)
 
-    print "First split ARI: {}".format(first_ari)
+    print("First split ARI: {}".format(first_ari))
 
     inf_labels = np.array(cellpart)
     cell_sets = {i:np.argwhere(inf_labels == i).flatten() for i in range(max_blocks + 1)}
 
-    print [len(a) for a in cell_sets.values()]
+    print([len(a) for a in cell_sets.values()])
 
     results.append((true_labels, first_ari, cellpart, snvpart))
     # break M into submatrices by rows using cell clusters
@@ -1108,7 +1131,7 @@ def test_graphtool_recursive(M, min_blocks = 4, max_blocks = 5, nested = False):
             
             next_ari, (cellpart, snvpart) = test_graphtool(myM, my_labels, min_blocks, max_blocks, nested)
 
-            print "Recursive split ARI: {} (on {} cells)".format(next_ari, len(cset))
+            print("Recursive split ARI: {} (on {} cells)".format(next_ari, len(cset)))
 
             results.append((my_labels, next_ari, cellpart, snvpart))
 
@@ -1132,7 +1155,7 @@ def kmeans_remove_clonal(M):
         elif label == 2:
             idx2.append(idx)
         else:
-            print "uhoh"
+            print("uhoh")
 
     colsums = colsums.reshape(-1, 1)
     mean0 = np.mean(colsums[idx0])
@@ -1167,12 +1190,12 @@ def generate_basic_instances(ncells, nsnvs, cov, pc, ps, pcl, n_instances = 10, 
     clone1_muts = int(ps * nsnvs * (1 - pcl))
     clone2_muts = nsnvs - clonal - clone1_muts
 
-    print datetime.now(), "Started generating instances"
+    print(datetime.now(), "Started generating instances")
     instances = [generate_toy(n_cells = ncells, n_muts = nsnvs, coverage=cov, prop_clonal=pcl,
                                 part1_cell_fraction = pc, part1_mut_fraction= ps, seed=sd, 
                                 matrix_only = matrix_only) for sd in range(n_instances)]
 
-    print datetime.now(), "Done generating instances"
+    print(datetime.now(), "Done generating instances")
 
     return instances
 
@@ -1259,7 +1282,7 @@ def test_naive_cols_kmeans(M, true_part):
         elif label == 2:
             idx2.append(idx)
         else:
-            print "uhoh"
+            print("uhoh")
     
     colsums = colsums.reshape(-1, 1)
     mean0 = np.mean(colsums[idx0])
@@ -1334,7 +1357,7 @@ def adjacency_regularization(A, tau = 3, norm = 'L1'):
     Are = A.copy().todense()
     # Scale only those elements in rows/columns with degree above thresholds
     if len(idx1) == 0:
-        print "No row-wise regularization"
+        print("No row-wise regularization")
     else:
         if norm == 'L1':
             Are[idx1] = np.diag(float(threshold1) / rdegrees[idx1]) * A[idx1]
@@ -1342,7 +1365,7 @@ def adjacency_regularization(A, tau = 3, norm = 'L1'):
             Are[idx1] = np.diag(np.sqrt(float(threshold1) / rdegrees[idx1])) * A[idx1]
     
     if len(idx2) == 0:
-        print "No column-wise regularization"
+        print("No column-wise regularization")
     else:
         if norm == 'L1':
             Are[:, idx2] = A[:, idx2] * np.diag(float(threshold2) / cdegrees[idx2]) 
@@ -1373,7 +1396,7 @@ def SC_RRE(A, tau = 1.5, norm = 'L2', n_vectors = None, rows_k = 2, cols_k = 3, 
     
     # Cluster and partition rows
     Z1 = np.matmul(Z1, s).reshape(-1, dim2)
-    print Z1.shape, s.shape, A.shape
+    print(Z1.shape, s.shape, A.shape)
     x_model = KMeans(n_clusters = rows_k, random_state = 0).fit(Z1)
     x_clusters = x_model.predict(Z1)
     
@@ -1404,3 +1427,149 @@ def test_SCRRE(M, true_labels, n_vectors = 1, tau = 1.5, norm = 'L1'):
     return adjusted_rand_score(true_labels, pred_labels)
     #adjusted_mutual_info_score(true_labels, pred_labels, average_method='arithmetic'), normalized_mutual_info_score(true_labels, pred_labels, average_method='arithmetic')
 
+
+# sample 0-entries as well for BnpC, SCITE, and SCG
+def generate_toy_with0s(n_cells = 100, n_muts = 1000, coverage=0.05, prop_clonal=0.10, part1_cell_fraction =0.5, part1_mut_fraction=0.5, seed=0, verbose=False, matrix_only = False):
+    n_clonal = int(n_muts * prop_clonal)
+    n_cells_part1 = int(part1_cell_fraction * n_cells)
+    last_mut_part1 = int(part1_mut_fraction * n_muts * (1 - prop_clonal)) + n_clonal
+    
+    my_design = np.array([[1, 1, 0], [1, 0, 1]])
+    row_thresholds = [n_cells_part1, n_cells]
+    col_thresholds = [n_clonal, last_mut_part1, n_muts]
+
+    M, cellsets, snvsets = generate_toy_design_with0s(my_design, row_thresholds, col_thresholds, coverage=coverage, seed=seed)
+    if matrix_only:
+        return M
+    else:
+        return M, cellsets, snvsets
+
+def generate_toy_design_with0s(design, rowdims, coldims, coverage = 0.05, seed = 0):
+    mblocks, nblocks = design.shape
+    assert mblocks > 0
+    assert nblocks > 0
+    assert mblocks == len(rowdims)
+    assert nblocks == len(coldims)
+    assert coverage > 0
+    
+    rowdims = np.array(rowdims)
+    coldims = np.array(coldims)
+
+    np.random.seed(seed)
+
+    rboundaries = np.concatenate(([0], rowdims))
+    cboundaries = np.concatenate(([0], coldims))
+    
+    rvalues = [rboundaries[i + 1] - rboundaries[i] for i in range(len(rboundaries) - 1)]
+    cvalues = [cboundaries[i + 1] - cboundaries[i] for i in range(len(cboundaries) - 1)]
+     
+    # generate blocks
+    blocks = [[generate_block_with0s(design[i, j] * coverage, (rvalues[i], cvalues[j])) 
+               if design[i, j] > 0 else np.zeros((rvalues[i], cvalues[j])) for j in range(nblocks)] for i in range(mblocks)]
+    matrix = np.block(blocks)
+        
+    # Construct the true partition
+    row_starts = np.append([0], rowdims[:-1])
+    true_cellsets = [set([a for a in range(row_starts[i], rowdims[i])]) for i in range(len(rowdims))]
+    col_starts = np.append([0], coldims[:-1])
+    true_snvsets =  [set([a for a in range(col_starts[i], coldims[i])]) for i in range(len(coldims))]
+
+    M = scipy.sparse.csr_matrix(matrix)
+    
+    return M, true_cellsets, true_snvsets
+
+def generate_block_with0s(s, shape):
+    # sample 2 * cov entries
+    my_block = np.random.binomial(1, 2 * s, shape) 
+    
+    # flip each entry to -1 with probability 0.5
+    observed_0s = -2 * np.random.binomial(1, 0.5, shape) + 1
+
+    return my_block * observed_0s
+
+def generate_treesim_with0s(design, row_thresholds, col_thresholds, true_first_split = [], cov = 0.01, seed = 0, max_cluster_size = 2, version = 'impute'):
+    """
+    Generate a tree-structured simulated block matrix using the given parameters.
+    """
+    mblocks = len(row_thresholds)
+    nblocks = len(col_thresholds)
+    if len(true_first_split) > 0:
+        assert len(true_first_split) == 2
+        assert sum([len(a) for a in true_first_split]) == len(row_thresholds)
+        assert all(a < mblocks for b in true_first_split for a in b)
+        assert all(a >= 0 for b in true_first_split for a in b)
+    else:
+        true_first_split = [[0,1], list(range(2, 8))]
+    
+    print datetime.now(), "Constructing matrix"
+    M0, true_csets, true_ssets = generate_toy_design_with0s(design, row_thresholds, col_thresholds, coverage = cov, seed = seed)
+    print datetime.now(), "Merging cells within clones"
+
+    if version == 'supernodes':
+        M1, my_row_thresholds = merge_perfect_with0s(M0, true_csets, max_cluster_size = max_cluster_size, seed = seed, version = version)
+        my_row_values = [(my_row_thresholds[i] - my_row_thresholds[i-1] if i > 0 else my_row_thresholds[i]) for i in range(len(my_row_thresholds))]        
+        true_labels = [[i] * my_row_values[i] for i in range(len(my_row_values))]
+        true_labels = np.concatenate(true_labels)
+        
+        return M1, true_labels, true_ssets
+        
+    else:
+        M1 = merge_perfect_with0s(M0, true_csets, max_cluster_size = max_cluster_size, seed = seed, version = version)
+
+        snv_split = [[8], [0, 1, 9], list(range(2, 8)) + list(range(10, 15))]
+        cell_part = [set().union(*[true_csets[a] for a in true_first_split[i]]) for i in range(2)]
+        snv_part = [set().union(*[true_ssets[a] for a in snv_split[i]]) for i in range(3)]
+        
+        return M1, cell_part + snv_part
+
+def merge_perfect_with0s(M, clone_rows, max_cluster_size = 2, seed = 0, balanced = False, version = 'impute'):
+    assert version == 'impute' or version == 'supernodes'
+    if scipy.sparse.issparse(M):
+        M = np.copy(M.todense())
+    else:
+        M = np.copy(M)
+    
+    # for each clone, cluster cells arbitrarily within this clone
+    clusters = {}
+    last_row_perclone = []
+    i = 0
+    for rows in clone_rows:
+        # rows is a list of the row indexes corresponding to this clone        
+        for cl in randomly_cluster(rows, max_cluster_size, seed, balanced = balanced):
+            assert len(cl) <= max_cluster_size
+            clusters[i] = cl
+            i += 1
+        last_row_perclone.append(i)
+
+    if version == 'impute':
+        # impute SNVs across rows within each cluster        
+        for idx, cl in list(clusters.items()):
+            rows_idx = np.array(list(cl))
+
+            positive_cols_idx = np.argwhere(np.any(M[rows_idx] > 0, axis = 0)).flatten()
+            negative_cols_idx = [j for j in np.argwhere(np.any(M[rows_idx] < 0, axis = 0)).flatten() if j not in positive_cols_idx]
+            M[np.repeat(rows_idx, len(positive_cols_idx)), np.tile(positive_cols_idx, len(rows_idx))] = 1
+            M[np.repeat(rows_idx, len(negative_cols_idx)), np.tile(negative_cols_idx, len(rows_idx))] = -1
+
+            return scipy.sparse.csr_matrix(M)
+    elif version == 'supernodes':
+        cl_idx = 0
+        rows = []
+        cols = []
+        data = []
+        for _, cl in list(clusters.items()):
+            rows_idx = np.array(list(cl))
+            positive_cols_idx = np.argwhere(np.any(M[rows_idx] > 0, axis = 0)).flatten()
+            # only include negative entries (observed absence) if they don't coincide with positive entries (observed presence)
+            negative_cols_idx = [j for j in np.argwhere(np.any(M[rows_idx] < 0, axis = 0)).flatten() if j not in positive_cols_idx]
+            
+            rows.extend([cl_idx] * len(positive_cols_idx))
+            cols.extend(list(positive_cols_idx))
+            data.extend([1] * len(positive_cols_idx))
+            
+            rows.extend([cl_idx] * len(negative_cols_idx))
+            cols.extend(list(negative_cols_idx))
+            data.extend([-1] * len(negative_cols_idx))
+            
+            cl_idx += 1
+        return scipy.sparse.csr_matrix((data, (rows, cols)), shape = (cl_idx, M.shape[1])), last_row_perclone
