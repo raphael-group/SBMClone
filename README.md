@@ -31,7 +31,7 @@ With the dependencies set up correctly, the following command will run SBMClone 
 
     python sbmclone.py example-matrix.csv
 
-This should take no more than 30 seconds to run and the output should match the contents of the sample_output folder.
+This should take no more than a minute to run and the output should match the contents of the sample_output folder.
 
 Usage
 ----------------
@@ -54,7 +54,6 @@ specifies a binary mutation matrix with the following form:
 0 0 1 0
 ```
 
-The SBMClone script infers the size of the matrix from the input data. 
 The SBMClone script infers the size of the matrix from the input data. 
 
 The inference method is random, so by default SBMClone uses a random-number-generator seed of 0 to ensure that results are reproducible. This seed can be modified using the `-s` or `--seed` options.
@@ -89,7 +88,7 @@ The repository also contains several utilities for simulating mutation matrices 
 Additional information
 ----------------
 ###
-For assistance with running SBMClone, interpreting the results, or other related questions, please email me (Matt Myers) at this address: [matt.myers@cs.princeton.edu](mailto:matt.myers@cs.princeton.edu)
+For assistance with running SBMClone, interpreting the results, or other related questions, please email me (Matt Myers) at this address: [matt.myers@cs.princeton.edu](mailto:matt.myers@cs.princeton.edu).
 
 ### License
 See `LICENSE` for license information.
