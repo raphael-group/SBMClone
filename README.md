@@ -3,12 +3,6 @@
 SBMClone is a tool that uses stochastic block model (SBM) inference methods to identify clonal structure (groups of cells that share groups of mutations) in low-coverage single-cell DNA sequencing data.
 While SBMClone was originally designed for single-nucleotide variants, it can also be applied to other types of mutations such as structural variation. 
 
-<!--
-Tutorials for processing both of these types of data for use in SBMClone are included below.
-
-The full description of the algorithm and its application to published cancer datasets is  in
-[Matthew Myers, Simone Zaccaria, Ben Raphael, 2020](https://doi.org/10.1101/??????) -->
-
 Setup
 ------------------------
 The setup process for SBMClone requires the following steps:
@@ -68,7 +62,7 @@ The inference method is random, so by default SBMClone uses a random-number-gene
 The command to run SBMClone on input file `matrix.csv` is simply `python sbmclone.py matrix.csv.` Additional command line options can be included between `sbmclone.py` and `matrix.csv`.
 
 ### Output
-SBMClone produces 2 output files in the specified output directory (default directory`output`):
+SBMClone produces 2 output files in the specified output directory (default directory `output`):
 * `cluster-assignments.txt`: comma-separated text file containing block assignments for each row and column in the matrix. The first line contains block labels for rows, and the second contains block assignments for columns. Note that empty rows and columns are not meaningful to the model (as they correspond to cells with no mutations or mutations that are found in no cells), so they are assigned to dummy blocks (last row/column block).
 * `blockmatrix.png`: PNG file showing the inferred block structure. Each row in this matrix corresponds to a clone (row block) and each column corresponds to a mutation cluster (column block). Each entry is labeled with the proportion of 1-entries in the corresponding rows and columns, and is shaded likewise. Note that each value is also the maximum-likelihood estimate of the block probability *p* for the corresponding block. This visualization can be disabled with the command-line option `no-visual`.
 
