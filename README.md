@@ -40,6 +40,7 @@ The input to SBMClone is a binary mutation matrix where rows correspond to cells
 
 ```
 0,1
+3,0
 1,1
 2,3
 3,2
@@ -49,7 +50,7 @@ specifies a binary mutation matrix with the following form:
 ```
 0 1 0 0
 0 1 0 0
-0 0 0 1
+1 0 0 1
 0 0 1 0
 ```
 
