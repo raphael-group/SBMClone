@@ -127,7 +127,6 @@ def blockmodel_to_labels(b, label2id, n_cells = None, n_muts = None, maxblocks =
     
     cell_array = [(b[label2id['cell{}'.format(i)]] if 'cell{}'.format(i) in label2id else maxblocks + 1) for i in range(n_cells)]
     temp = sorted(list(Counter(cell_array).keys()))
-    print(temp)
     cell_idx_to_blocknum = {temp[i]:i + 1 for i in range(len(temp))}
     cell_array = [cell_idx_to_blocknum[a] for a in cell_array]
     
