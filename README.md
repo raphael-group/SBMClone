@@ -82,6 +82,10 @@ optional arguments:
   --seed SEED                           Random seed for replication (default: 0)
 ```
 
+Programming interface
+----------------
+The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please contact me (details below).
+
 Additional information
 ----------------
 ###
