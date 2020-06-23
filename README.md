@@ -85,6 +85,43 @@ Programming interface
 ----------------
 The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please contact me (details below).
 
+
+Structural Variant Processing
+----------------
+The repository includes scripts for processing structural variants (SVs) called by LUMPY and producing the corresponding binary mutation matrix, for input into SBMClone. 
+
+### Running LUMPY
+In order to use the SV processing scripts, [LUMPY](https://github.com/arq5x/lumpy-sv) must be run with the following specifications:
+ 
+* LUMPY must be run with the `-b` option at runtime, which outputs SVs in BEDPE format instead of VCF. 
+* LUMPY must also be run with the `-e` option at runtime, which includes evidence lines for each SV call in the output. This is necessary to retain the single-cell information. 
+* The input BAM file for LUMPY should be preprocessed so that for every read, the read name is replaced with the corresponding cellular barcode (@CB field). This is to ensure that when LUMPY is run, the evidence lines for each SV will include the cellular barcode rather than the read name.
+
+The SV processing scripts also include the option for filtering outputted SVs using genotyping stats determined by SVTyper. To use the filtering option, the genotyped VCF file outputted by SVTyper must first be sorted by the ID field. The command to sort the genotyped file `sv.gt.vcf` is:
+`grep '^#' sv.gt.vcf > sv.gt.sorted.vcf && grep -v '^#' sv.gt.vcf | sort -nk3 >> sv.gt.sorted.vcf`
+
+### Usage
+The command to process a BEDPE file `sv.bedpe`, containing SVs called by LUMPY as specified above, is `python sv_process.py sv.bedpe`. Additional command line options can be included as described below.
+
+### Output
+The command line script produces two output files, named with the default prefix "sv_out".
+* `sv_out.extracted.csv`: comma-separated text file that contains one line for each SV/cell combination, with information about each SV extracted from the BEDPE file. 
+* `sv_out.sbm.csv`: binary mutation matrix in SBMClone format.
+
+### Command line options
+```
+positional arguments:
+  INFILE                                   SVs in BEDPE format, as called by LUMPY.
+
+optional arguments:
+  -o OUTPUT                                Output prefix (default "sv_out").
+  -f SVTYPER_VCF, --filter SVTYPER_VCF     Use specified SVTyper output VCF file to filter SVs. The VCF must be sorted by the ID field.
+  -q MIN_QUALITY, --quality MIN_QUALITY    Filter SVs by minimum sample quality value (SQ) reported by SVTyper. 
+```
+
+For example, the command to process SVs in `sv.bedpe`, using `sv.gt.sorted.vcf` to filter out SVs with a quality score <100, is `python sv_process.py -f sv.gt.sorted.vcf -q 100 sv.bedpe`.
+
+
 Additional information
 ----------------
 ###

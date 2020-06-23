@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument("-o", metavar="OUTPUT", dest="output", required=False, type=str, 
                         default="sv_out", help="Output prefix (default \"sv_out\").")
     parser.add_argument("-f", "--filter", metavar="SVTYPER_VCF", required=False, type=str, 
-                        default=None, help="Use SVTyper output VCF file to filter SVs.")
+                        default=None, help="Use specified SVTyper output VCF file to filter SVs. The VCF must be sorted by the ID field.")
     parser.add_argument("-q", "--quality", metavar="MIN_QUALITY", type=int, dest="quality", required=False,
                         default=None,
                        help="Filter SVs by minimum sample quality value (SQ) reported by SVTyper.")
