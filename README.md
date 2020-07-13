@@ -86,21 +86,17 @@ optional arguments:
 
 Programming interface
 ----------------
-The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please contact me (details below).
-
+The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please [contact me](#additional-information).
 
 # Generating input to SBMClone
-
 In this repository we have also included guidance and utility scripts for generating the input data to SBMClone from the following types of data:
 * [Single-nucleotide mutations](#single-nucleotide-mutations)
 * [Structural variants](#structural-variants)
 
 ## Single-nucleotide mutations
-----------------
 (coming soon)
 
 ## Structural variants
-----------------
 The repository includes scripts for processing structural variants (SVs) called by LUMPY and producing the corresponding binary mutation matrix, for input into SBMClone. 
 
 ### Running LUMPY
@@ -124,12 +120,17 @@ The command line script produces two output files, named with the default prefix
 ### Command line options
 ```
 positional arguments:
-  INFILE                                   SVs in BEDPE format, as called by LUMPY.
+  INFILE                SVs called by LUMPY, in BEDPE format
 
 optional arguments:
-  -o OUTPUT                                Output prefix (default "sv_out").
-  -f SVTYPER_VCF, --filter SVTYPER_VCF     Use specified SVTyper output VCF file to filter SVs. The VCF must be sorted by the ID field.
-  -q MIN_QUALITY, --quality MIN_QUALITY    Filter SVs by minimum sample quality value (SQ) reported by SVTyper. 
+  -h, --help            show this help message and exit
+  -o OUTPUT             Output prefix (default "sv_out").
+  -f SVTYPER_VCF, --filter SVTYPER_VCF
+                        Use specified SVTyper output VCF file to filter SVs.
+                        The VCF must be sorted by the ID field.
+  -q MIN_QUALITY, --quality MIN_QUALITY
+                        Filter SVs by minimum sample quality value (SQ)
+                        reported by SVTyper.
 ```
 
 For example, the command to process SVs in `sv.bedpe`, using `sv.gt.sorted.vcf` to filter out SVs with a quality score <100, is `python sv_process.py -f sv.gt.sorted.vcf -q 100 sv.bedpe`.
