@@ -57,7 +57,7 @@ specifies a binary mutation matrix with the following form:
 0 0 1 0
 ```
 
-The SBMClone script infers the size of the matrix from the input data. **Additional guidance on generating input data to SBMClone** can be [found below](#generating-input-to-sbmclone).
+The SBMClone script infers the size of the matrix from the input data. **Additional guidance on generating input data to SBMClone can be [found below](#generating-input-to-sbmclone)**.
 
 The inference method is random, so by default SBMClone uses a random-number-generator seed of 0 to ensure that results are reproducible. This seed can be modified using the `-s` or `--seed` options.
 
@@ -91,7 +91,7 @@ The repository also contains several utilities for simulating mutation matrices 
 
 # Generating input to SBMClone
 
-In this repository we have also included guidance and utility scripts for generating the input data to SBMClone:
+In this repository we have also included guidance and utility scripts for generating the input data to SBMClone from the following types of data:
 * [Single-nucleotide mutations](#single-nucleotide-mutations)
 * [Structural variants](#structural-variants)
 
@@ -135,8 +135,9 @@ optional arguments:
 For example, the command to process SVs in `sv.bedpe`, using `sv.gt.sorted.vcf` to filter out SVs with a quality score <100, is `python sv_process.py -f sv.gt.sorted.vcf -q 100 sv.bedpe`.
 
 
-# Additional information #
 ----------------
+
+# Additional information #
 ###
 For assistance with running SBMClone, interpreting the results, or other related questions, please email me (Matt Myers) at this address: [matt.myers@cs.princeton.edu](mailto:matt.myers@cs.princeton.edu). Many thanks to Claire Du for contributing the structural variant processing scripts and documentation.
 
