@@ -34,7 +34,7 @@ With the dependencies set up correctly, the following command will run SBMClone 
 
     python sbmclone.py example-matrix.csv
 
-This should take no more than a minute to run and the output should match the contents of the sample_output folder.
+This should take no more than a minute to run, and the output should match the contents of the sample_output folder.
 
 Usage
 ----------------
@@ -59,10 +59,10 @@ specifies a binary mutation matrix with the following form:
 
 The SBMClone script infers the size of the matrix from the input data. **Additional guidance on generating input data to SBMClone can be [found below](#generating-input-to-sbmclone)**.
 
-The inference method is random, so by default SBMClone uses a random-number-generator seed of 0 to ensure that results are reproducible. This seed can be modified using the `-s` or `--seed` options.
+
 
 ### Running
-The command to run SBMClone on input file `matrix.csv` is simply `python sbmclone.py matrix.csv.` Additional command line options can be included between `sbmclone.py` and `matrix.csv`.
+The command to run SBMClone on input file `matrix.csv` is simply `python sbmclone.py matrix.csv.` Additional command line options can be included between `sbmclone.py` and `matrix.csv`. The inference method is random, so by default SBMClone uses a random number generator seed of 0 to ensure that results are reproducible. This seed can be modified using the `-s` or `--seed` options.
 
 ### Output
 SBMClone produces 2 output files in the specified output directory (default directory `output`):
@@ -88,7 +88,7 @@ Programming interface
 ----------------
 The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please [contact me](#additional-information).
 
-# Generating input to SBMClone
+# Generating input to SBMClone #
 In this repository we have also included guidance and utility scripts for generating the input data to SBMClone from the following types of data:
 * [Single-nucleotide mutations](#single-nucleotide-mutations)
 * [Structural variants](#structural-variants)
