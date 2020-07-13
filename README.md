@@ -1,7 +1,10 @@
 # SBMClone #
 
 SBMClone is a tool that uses stochastic block model (SBM) inference methods to identify clonal structure (groups of cells that share groups of mutations) in low-coverage single-cell DNA sequencing data.
-While SBMClone was originally designed for single-nucleotide variants, it can also be applied to other types of mutations such as structural variation. 
+While SBMClone was originally designed for single-nucleotide variants, it can also be applied to other types of mutations such as structural variants. 
+
+SBMclone is described in detail here (open-access):
+[Myers, Zaccaria, and Raphael, *Bioinformatics* 2020](https://doi.org/10.1093/bioinformatics/btaa449)
 
 Setup
 ------------------------
@@ -54,7 +57,7 @@ specifies a binary mutation matrix with the following form:
 0 0 1 0
 ```
 
-The SBMClone script infers the size of the matrix from the input data. 
+The SBMClone script infers the size of the matrix from the input data. **Additional guidance on generating input data to SBMClone** can be [found below](#generating-input-to-sbmclone).
 
 The inference method is random, so by default SBMClone uses a random-number-generator seed of 0 to ensure that results are reproducible. This seed can be modified using the `-s` or `--seed` options.
 
@@ -86,7 +89,17 @@ Programming interface
 The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please contact me (details below).
 
 
-Structural Variant Processing
+# Generating input to SBMClone
+
+In this repository we have also included guidance and utility scripts for generating the input data to SBMClone:
+* [Single-nucleotide mutations](#single-nucleotide-mutations)
+* [Structural variants](#structural-variants)
+
+## Single-nucleotide mutations
+----------------
+(coming soon)
+
+## Structural variants
 ----------------
 The repository includes scripts for processing structural variants (SVs) called by LUMPY and producing the corresponding binary mutation matrix, for input into SBMClone. 
 
@@ -122,13 +135,13 @@ optional arguments:
 For example, the command to process SVs in `sv.bedpe`, using `sv.gt.sorted.vcf` to filter out SVs with a quality score <100, is `python sv_process.py -f sv.gt.sorted.vcf -q 100 sv.bedpe`.
 
 
-Additional information
+# Additional information #
 ----------------
 ###
-For assistance with running SBMClone, interpreting the results, or other related questions, please email me (Matt Myers) at this address: [matt.myers@cs.princeton.edu](mailto:matt.myers@cs.princeton.edu).
+For assistance with running SBMClone, interpreting the results, or other related questions, please email me (Matt Myers) at this address: [matt.myers@cs.princeton.edu](mailto:matt.myers@cs.princeton.edu). Many thanks to Claire Du for contributing the structural variant processing scripts and documentation.
 
 ### License
 See `LICENSE` for license information.
 
 ### Citation
-(coming soon)
+Matthew A Myers, Simone Zaccaria, Benjamin J Raphael, Identifying tumor clones in sparse single-cell mutation data, *Bioinformatics*, Volume 36, Issue Supplement_1, July 2020, Pages i186–i193, [https://doi.org/10.1093/bioinformatics/btaa449](https://doi.org/10.1093/bioinformatics/btaa449)
