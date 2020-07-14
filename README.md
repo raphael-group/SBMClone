@@ -86,7 +86,9 @@ optional arguments:
 
 Programming interface
 ----------------
-The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please [contact me](#additional-information).
+The repository also contains several utilities for simulating mutation matrices with various sizes and sets of parameters (in `src/simulation.py`), as well as benchmarking tools including implementations of other methods for partitioning cells such as spectral clustering and naive k-means approaches (in `src/benchmarking.py`). For assistance using these functions, please contact me ([details below](#additional-information)).
+
+----------------
 
 # Generating input to SBMClone #
 In this repository we have also included guidance and utility scripts for generating the input data to SBMClone from the following types of data:
