@@ -96,7 +96,20 @@ In this repository we have also included guidance and utility scripts for genera
 * [Structural variants](#structural-variants)
 
 ## Single-nucleotide mutations
-(coming soon)
+### Recommended workflow
+The recommended workflow uses several utilities from [CHISEL](https://github.com/raphael-group/chisel/), which can be installed via conda.
+
+1. (skip if all cells are in one file) Merge single-cell BAM files into one file with barcodes using the [chisel_prep command](https://github.com/raphael-group/chisel/blob/master/man/chisel-prep.md)
+2. (skip if reads are already aligned) Align reads to preferred reference genome (e.g., using [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#command-line)).
+3. Call mutations using your favorite variant caller (e.g., [varscan](http://varscan.sourceforge.net/somatic-calling.html)).
+4. Convert variant caller output (VCF format) to Mutator input using `varscan2mutator.py`. Example usage to generate `mutator_input.tsv` from `my_variants.vcf`:
+```
+python3 varscan2mutator.py my_variants.vcf mutator_input.tsv
+```
+5. Run [CHISEL/Mutator.py](https://github.com/raphael-group/chisel/blob/master/src/chisel/Mutator.py) to extract cell-mutation pairs (see arguments at the top of the script). This script produces a TSV file  with columns CHR (chromosome), POS (position, CELL (cell barcode), MUT (variant allele), MUTCOV (number of reads from this cell containing the variant allele), COV (total number of reads from this cell that cover this position).
+6. Construct SBMClone input file [described above](#input) using a subset* of the mutations output by Mutator.
+
+\*In principle, each row in the table could correspond to a 1-entry in the matrix provided to SBMClone. However, it may be useful to restrict the included mutations to those that are present in a sufficient number of cells, are supported by sufficiently many reads, and/or do not appear to be germline mutations (i.e., are absent from the matched normal or pseudonormal sample). For example, in our analysis of the DOP-PCR dataset in the paper, we restricted analysis to mutations with at least 10 total reads, present in <80% of tumor cells, and present in no more than 1 cell in the pseudo-normal sample (see Supplement section S11 for details)
 
 ## Structural variants
 The repository includes scripts for processing structural variants (SVs) called by LUMPY and producing the corresponding binary mutation matrix, for input into SBMClone. 
