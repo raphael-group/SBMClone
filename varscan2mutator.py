@@ -46,6 +46,8 @@ def main():
             fin.readline()
             prev_line = ("chr1", "-1")
             for line in fin:
+                if line.startswith('##'):
+                    continue
                 chr, pos, ref, code = line.split('\t')[:4]
                 if len(chr) > 5:
                     continue
