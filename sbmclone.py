@@ -52,9 +52,17 @@ def parse_args():
         "seed" : args.seed
     }
 
+def logArgs(args, width):
+    text = "\n"
+    for key in args:
+        text += "\t{}: {}\n".format(key, args[key])
+    log(msg=text, level="INFO")
 
 def run_sbmclone_cl():
     args = parse_args()
+    
+    logArgs(args, 80)
+    
     verbose = args['verbose']
 
     seed = args['seed']    
