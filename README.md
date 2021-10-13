@@ -21,6 +21,8 @@ The following software is required for SBMClone:
 * Python 3
 * Python packages: [numpy](https://numpy.org/), [scipy](https://www.scipy.org/scipylib/index.html), [graph-tool](https://graph-tool.skewed.de/), [matplotlib](https://matplotlib.org/), [networkx](https://networkx.org/)
 
+Last tested with python=3.9.7, numpy=1.21.2, scipy=1.7.1, graph-tool=2.43, matplotlib=3.4.2, networkx=2.6.3
+
 I recommend using the `conda` environment manager to manage dependencies. With the Python 3 version of [Anaconda](https://www.anaconda.com/products/individual)  or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed, the following commands will set up an environment to run SBMClone:
 ```
 conda create -n sbmclone
