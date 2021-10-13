@@ -72,9 +72,10 @@ def run_sbmclone_cl():
     if verbose:
         log("Writing block assignments...")
     clusters_outfile = os.path.join(args['outdir'], "cluster-assignments.txt")
+
     with open(clusters_outfile, "w") as f:
-        f.write(",".join([str(a) for a in row_part]) + os.linesep)
-        f.write(",".join([str(a) for a in col_part]) + os.linesep)
+        f.write(",".join([str(a) for a in reindex(row_part)]) + os.linesep)
+        f.write(",".join([str(a) for a in reindex(col_part)]) + os.linesep)
     
     if args['visualize']:
         if verbose:
@@ -96,10 +97,10 @@ def SBMClone(M, min_blocks = 2, max_blocks = None, nested = True, verbose = True
     m, n = M.shape
     G, label2id, vtype = construct_graph_graphtool(M)
     if nested:
-        r = gt_min.minimize_nested_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
+        r = gt_min.minimize_nested_blockmodel_dl(G, multilevel_mcmc_args={'B_min':min_blocks, 'B_max':max_blocks}, state_args = {'clabel': vtype})
         b = r.get_bs()[0]
     else:
-        r = gt_min.minimize_blockmodel_dl(G, B_min = min_blocks, B_max = max_blocks, state_args = {'clabel': vtype})
+        r = gt_min.minimize_blockmodel_dl(G, multilevel_mcmc_args={'B_min':min_blocks, 'B_max':max_blocks},state_args = {'clabel': vtype})
         b = r.get_blocks()
 
     end = datetime.now()

@@ -146,7 +146,7 @@ def construct_graph_graphtool(M):
     M = M.tocoo()
     G = graph_tool.Graph(directed = False)
     
-    vtype = G.new_vertex_property("short")
+    vtype = G.new_vertex_property("int")
 
     label2id = {}
     for i,j,value in zip(M.row, M.col, M.data):
@@ -169,6 +169,20 @@ def construct_graph_graphtool(M):
 
         G.add_edge(v, w)  
     return G, label2id, vtype
+
+def reindex(labels):
+    """
+    Given a list of labels, reindex them as integers from 1 to n_labels
+    Also orders them in nonincreasing order of prevalence
+    """
+    old2new = {}
+    j = 1
+    for i, _ in Counter(labels).most_common():
+        old2new[i] = j
+        j += 1
+    old2newf = lambda x: old2new[x]
+
+    return [old2newf(a) for a in labels]
 
 def graph_to_csr(G):
     """
