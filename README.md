@@ -19,22 +19,23 @@ The following command clones the current SBMClone repository from GitHub:
 The following software is required for SBMClone:
 
 * Python 3
-* Python packages: [numpy](https://numpy.org/) [scipy](https://www.scipy.org/scipylib/index.html) [graph-tool](https://graph-tool.skewed.de/) [matplotlib](https://matplotlib.org/)
+* Python packages: [numpy](https://numpy.org/), [scipy](https://www.scipy.org/scipylib/index.html), [graph-tool](https://graph-tool.skewed.de/), [matplotlib](https://matplotlib.org/), [networkx](https://networkx.org/)
 
 I recommend using the `conda` environment manager to manage dependencies. With the Python 3 version of [Anaconda](https://www.anaconda.com/products/individual)  or [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed, the following commands will set up an environment to run SBMClone:
 ```
 conda create -n sbmclone
 conda activate sbmclone
-conda install numpy scipy matplotlib
+conda install numpy scipy matplotlib networkx
 conda install -c conda-forge graph-tool 
 ```
 
 ### Testing
 With the dependencies set up correctly, the following command will run SBMClone on the provided test input and write the results to a subdirectory called "output":
-
+    
+    mkdir output
     python sbmclone.py example-matrix.csv
 
-This should take no more than a minute to run, and the output should match the contents of the sample_output folder.
+This should take no more than a minute to run, and the output should match the contents of the `example-output` folder.
 
 Usage
 ----------------
